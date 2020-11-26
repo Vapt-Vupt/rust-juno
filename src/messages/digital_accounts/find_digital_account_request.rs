@@ -1,8 +1,10 @@
-use crate::messages::abstract_request::{AbstractRequest};
+use crate::messages::AbstractRequest;
 use reqwest::Method;
 use serde_json::*;
 
-pub struct FindDigitalAccountRequest(pub Value);
+// https://dev.juno.com.br/api/v2#operation/findDigitalAccount
+
+pub struct FindDigitalAccountRequest {}
 
 impl AbstractRequest for FindDigitalAccountRequest {
     
@@ -10,8 +12,8 @@ impl AbstractRequest for FindDigitalAccountRequest {
         Method::GET
     }
 
-    fn endpoint(&self) -> &'static str {
-        "digital-accounts"
+    fn endpoint(&self) -> String {
+        format!("digital-accounts")
     }
 
     fn data(&self) -> Value {

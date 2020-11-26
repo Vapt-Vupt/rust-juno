@@ -14,9 +14,7 @@ mod tests {
         let juno = juno_api::JunoApi::new("client_id", "client_secret")
             .test_mode(true);
 
-        let req = messages::GetCompanyTypesRequest (
-            serde_json::json!({}),
-        );
+        let req = messages::data::GetCompanyTypesRequest {};
 
         let response = juno.request(req).await.unwrap();
 

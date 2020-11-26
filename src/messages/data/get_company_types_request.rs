@@ -1,8 +1,10 @@
-use crate::messages::abstract_request::{AbstractRequest};
+use crate::messages::AbstractRequest;
 use reqwest::Method;
 use serde_json::*;
 
-pub struct GetCompanyTypesRequest(pub Value);
+// https://dev.juno.com.br/api/v2#operation/getCompanyTypes
+
+pub struct GetCompanyTypesRequest {}
 
 impl AbstractRequest for GetCompanyTypesRequest {
     
@@ -10,8 +12,8 @@ impl AbstractRequest for GetCompanyTypesRequest {
         Method::GET
     }
 
-    fn endpoint(&self) -> &'static str {
-        "data/company-types"
+    fn endpoint(&self) -> String {
+        format!("data/company-types")
     }
 
     fn data(&self) -> Value {

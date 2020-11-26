@@ -7,7 +7,7 @@ pub trait AbstractRequest {
     }
 
     fn http_method(&self) -> Method;
-    fn endpoint(&self) -> &'static str;
+    fn endpoint(&self) -> String;
     fn data(&self) -> Value;
 
     fn headers(&self) -> header::HeaderMap {

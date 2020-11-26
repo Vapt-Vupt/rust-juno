@@ -82,8 +82,8 @@ impl JunoApi {
 
         let mut cache_guard = CACHE.lock().unwrap();
 
-        match cache_guard.get(&basic_authorization) {
-            Some(value) => format!("Bearer {}", value),
+        let token = match cache_guard.get(&basic_authorization) {
+            Some(value) => value.clone(),
             None => {
                 let mut headers = reqwest::header::HeaderMap::new();
 
@@ -109,8 +109,10 @@ impl JunoApi {
 
                 cache_guard.insert(basic_authorization, access_token.to_string(), Duration::new(expires_in, 0));
 
-                format!("Bearer {}", access_token)
+                access_token.to_string()
             }
-        }
+        };
+
+        format!("Bearer {}", token)
     }
 }
