@@ -1,10 +1,11 @@
 use crate::messages::AbstractRequest;
 use reqwest::Method;
 use serde_json::*;
+// use crate::utils::*;
 
 // https://dev.juno.com.br/api/v2#operation/getBusinessAreas
 
-pub struct GetBusinessAreasRequest {}
+pub struct GetBusinessAreasRequest;
 
 impl AbstractRequest for GetBusinessAreasRequest {
     

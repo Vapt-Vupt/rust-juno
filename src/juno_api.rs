@@ -5,12 +5,12 @@ use ttl_cache::TtlCache;
 use lazy_static::*;
 use std::sync::Mutex;
 use crate::messages::AbstractRequest;
+use crate::utils::*;
 
 pub struct JunoApi {
     test_mode: bool,
     client_id: String,
     client_secret: String,
-    resource_token: Option<String>,
 }
 
 impl JunoApi {
@@ -18,23 +18,18 @@ impl JunoApi {
     const TEST_BASE_URL: &'static str       = "https://sandbox.boletobancario.com/api-integration";
     const AUTH_LIVE_ENDPOINT: &'static str  = "https://api.juno.com.br/authorization-server/oauth/token";
     const AUTH_TEST_ENDPOINT: &'static str  = "https://sandbox.boletobancario.com/authorization-server/oauth/token";
-    
-    pub fn new(client_id: &str, client_secret: &str) -> Self {
+
+    pub fn with(config: serde_json::Value) -> Self {
+        config.validate_or_die(&["clientId", "clientSecret"]);
         Self {
-            test_mode: true,
-            client_id: client_id.to_string(),
-            client_secret: client_secret.to_string(),
-            resource_token: None,
+            test_mode: config["testMode"].as_bool().unwrap_or(false),
+            client_id: config["clientId"].as_str().unwrap().into(),
+            client_secret: config["clientSecret"].as_str().unwrap().into(),
         }
     }
 
     pub fn test_mode(mut self, value: bool) -> Self {
         self.test_mode = value;
-        self
-    }
-
-    pub fn resource_token(mut self, value: String) -> Self {
-        self.resource_token = Some(value);
         self
     }
 
@@ -100,9 +95,9 @@ impl JunoApi {
 
                 let response = request.send().await.unwrap();
 
-                let bytes = response.bytes().await.unwrap().to_vec();
+                let data: serde_json::Value = response.json().await.unwrap();
 
-                let data: serde_json::Value = serde_json::from_str(std::str::from_utf8(&bytes).unwrap()).unwrap();
+                data.validate_or_die(&["access_token", "expires_in"]);
 
                 let access_token = data["access_token"].as_str().unwrap();
                 let expires_in = data["expires_in"].as_u64().unwrap();

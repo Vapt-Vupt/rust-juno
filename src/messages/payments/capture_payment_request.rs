@@ -1,15 +1,20 @@
 use crate::messages::AbstractRequest;
 use reqwest::Method;
 use serde_json::*;
+use crate::utils::*;
 
 // https://dev.juno.com.br/api/v2#operation/capturePayment
 
 pub struct CapturePaymentRequest {
+    pub resource_token: String,
     pub id: String,
     pub parameters: Value,
 }
 
 impl AbstractRequest for CapturePaymentRequest {
+    fn resource_token(&self) -> Option<&String> {
+        Some(&self.resource_token)
+    }
     
     fn http_method(&self) -> Method {
         Method::POST
@@ -20,7 +25,10 @@ impl AbstractRequest for CapturePaymentRequest {
     }
 
     fn data(&self) -> Value {
-        self.parameters.clone()
+        self.parameters.only_or_die(&[
+            "chargeId",
+            "amount",
+        ])
     }
 }
 

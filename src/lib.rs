@@ -1,23 +1,32 @@
-
+pub mod utils;
 pub mod messages;
 pub mod juno_api;
-
 
 #[cfg(test)]
 mod tests {
 
     #[tokio::test]
     async fn test_connection() {
-        use crate::juno_api;
+        use crate::juno_api::*;
         use crate::messages;
 
-        let juno = juno_api::JunoApi::new("client_id", "client_secret")
-            .test_mode(true);
+        let juno = JunoApi::with(
+            serde_json::json!({
+                "clientId": "{clientId}",
+                "clientSecret": "{clientSecret}",
+            })
+        )
+        .test_mode(true);
 
-        let req = messages::data::GetCompanyTypesRequest {};
+        let req = messages::data::GetCompanyTypesRequest;
 
-        let response = juno.request(req).await.unwrap();
+        let response: reqwest::Response = juno.request(req).await.unwrap();
 
-        println!("{:?}", response.bytes().await);
+        if response.status() == 200 {
+            let json: serde_json::Value = response.json().await.unwrap();
+            println!("{:?}", json);
+        } else {
+            println!("{:?}", response.bytes().await);
+        }
     }
 }

@@ -2,7 +2,7 @@ use serde_json::*;
 use reqwest::*;
 
 pub trait AbstractRequest {
-    fn resource_token(&self) -> Option<String> {
+    fn resource_token(&self) -> Option<&String> {
         None
     }
 
