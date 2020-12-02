@@ -3,8 +3,41 @@ use reqwest::Method;
 use serde_json::*;
 use crate::utils::*;
 
-// https://dev.juno.com.br/api/v2#operation/createPayment
-
+/// Request model for route [https://dev.juno.com.br/api/v2#operation/createPayment](https://dev.juno.com.br/api/v2#operation/createPayment).
+///
+/// # Usage example
+/// ```
+/// let junoApi = JunoApi::with(
+///     serde_json::json!({
+///         "clientId": "{clientId}",
+///         "clientSecret": "{clientSecret}",
+///     })
+/// );
+/// let req = messages::payments::CreatePaymentRequest {
+///     resource_token: "{resourceToken}",
+///     parameters: serde_json::json!({
+///       "chargeId": "string",
+///       "billing": {
+///         "email": "string",
+///         "address": {
+///           "street": "string",
+///           "number": "string",
+///           "complement": "string",
+///           "neighborhood": "string",
+///           "city": "string",
+///           "state": "string",
+///           "postCode": "string"
+///         },
+///         "delayed": true
+///       },
+///       "creditCardDetails": {
+///         "creditCardId": "string",
+///         "creditCardHash": "string"
+///       }
+///     }),
+/// }
+/// let response = junoApi.request(req).await;
+/// ```
 pub struct CreatePaymentRequest {
     pub resource_token: String,
     pub parameters: Value,

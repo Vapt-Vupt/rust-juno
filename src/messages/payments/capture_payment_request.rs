@@ -3,8 +3,26 @@ use reqwest::Method;
 use serde_json::*;
 use crate::utils::*;
 
-// https://dev.juno.com.br/api/v2#operation/capturePayment
-
+/// Request model for route [https://dev.juno.com.br/api/v2#operation/capturePayment](https://dev.juno.com.br/api/v2#operation/capturePayment).
+///
+/// # Usage example
+/// ```
+/// let junoApi = JunoApi::with(
+///     serde_json::json!({
+///         "clientId": "{clientId}",
+///         "clientSecret": "{clientSecret}",
+///     })
+/// );
+/// let req = messages::payments::CapturePaymentRequest {
+///     resource_token: "{resourceToken}",
+///     id: "{id}",
+///     parameters: serde_json::json!({
+///       "chargeId": "string",
+///       "amount": 0
+///     }),
+/// };
+/// let response = junoApi.request(req).await;
+/// ```
 pub struct CapturePaymentRequest {
     pub resource_token: String,
     pub id: String,

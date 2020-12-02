@@ -7,6 +7,29 @@ use std::sync::Mutex;
 use crate::messages::AbstractRequest;
 use crate::utils::*;
 
+/// Juno api requires 2 fields: clientId and clientSecret to operate.
+///
+/// Every request implements AbstractRequest.
+/// To use this api with custom routes you need to implement AbstractRequest.
+///
+/// # Usage example
+/// ```
+/// let junoApi = JunoApi::with(
+///     serde_json::json!({
+///         "clientId": "{clientId}",
+///         "clientSecret": "{clientSecret}",
+///     })
+/// );
+/// let req = messages::data::GetBanksRequest;
+/// let response: reqwest::Response = juno.request(req).await.unwrap();
+/// 
+/// if response.status() == 200 {
+///     let json: serde_json::Value = response.json().await.unwrap();
+///     println!("{:?}", json);
+/// } else {
+///     println!("{:?}", response.bytes().await);
+/// }
+/// ```
 pub struct JunoApi {
     test_mode: bool,
     client_id: String,
@@ -19,6 +42,7 @@ impl JunoApi {
     const AUTH_LIVE_ENDPOINT: &'static str  = "https://api.juno.com.br/authorization-server/oauth/token";
     const AUTH_TEST_ENDPOINT: &'static str  = "https://sandbox.boletobancario.com/authorization-server/oauth/token";
 
+    /// Insert json args: {clientId, clientSecret, testMode}.
     pub fn with(config: serde_json::Value) -> Self {
         config.validate_or_die(&["clientId", "clientSecret"]);
         Self {
@@ -28,11 +52,17 @@ impl JunoApi {
         }
     }
 
+    /// Set testMode: false = production endpoint, true = sandbox endpoint.
     pub fn test_mode(mut self, value: bool) -> Self {
         self.test_mode = value;
         self
     }
 
+    /// Returns reqwest::Reponse from ```impl AbstractRequest```
+    ///
+    /// # Arguments
+    ///
+    /// * `req` - A request instance that implements AbstractRequest trait.
     pub async fn request(
         &self,
         req: impl AbstractRequest,
@@ -93,9 +123,9 @@ impl JunoApi {
                     .headers(headers)
                     .form(&[("grant_type", "client_credentials")]);
 
-                let response = request.send().await.unwrap();
+                let response = request.send().await.expect("Bearer token get error.");
 
-                let data: serde_json::Value = response.json().await.unwrap();
+                let data: serde_json::Value = response.json().await.expect("Received body is not in json format.");
 
                 data.validate_or_die(&["access_token", "expires_in"]);
 
