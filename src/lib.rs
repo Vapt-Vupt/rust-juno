@@ -1,15 +1,15 @@
 pub mod utils;
+pub mod errors;
 pub mod messages;
 pub mod juno_api;
 
 #[cfg(test)]
 mod tests {
+    use crate::juno_api::*;
+    use crate::messages;
 
     #[tokio::test]
     async fn test_connection() {
-        use crate::juno_api::*;
-        use crate::messages;
-
         let juno = JunoApi::with(
             serde_json::json!({
                 "clientId": "{clientId}",

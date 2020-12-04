@@ -1,4 +1,3 @@
-use serde_json;
 use base64::{encode as base64_encode};
 use std::{time::Duration};
 use ttl_cache::TtlCache;
@@ -6,6 +5,7 @@ use lazy_static::*;
 use std::sync::Mutex;
 use crate::messages::AbstractRequest;
 use crate::utils::*;
+use crate::errors::*;
 
 /// Juno api requires 2 fields: clientId and clientSecret to operate.
 ///
@@ -66,10 +66,12 @@ impl JunoApi {
     pub async fn request(
         &self,
         req: impl AbstractRequest,
-    ) -> Result<reqwest::Response, reqwest::Error>  {
+    ) -> Result<reqwest::Response, Error>  {
         let mut headers = reqwest::header::HeaderMap::new();
 
-        headers.append("Authorization", self.get_bearer_authorization().await.parse().unwrap());
+        let bearer_token = self.get_bearer_authorization().await?;
+
+        headers.append("Authorization", bearer_token.parse().unwrap());
         headers.extend(req.headers());
 
         let url = format!("{}/{}", self.base_url(), req.endpoint());
@@ -82,7 +84,22 @@ impl JunoApi {
             .headers(headers)
             .body(serde_json::to_string(&req.data()).unwrap());
 
-        request.send().await
+        let response = request.send().await;
+
+        if response.is_err() {
+            let error = response.err().unwrap();
+            let status = error.status().unwrap();
+
+            return Err(
+                match status {
+                    reqwest::StatusCode::UNAUTHORIZED => Error::InvalidAuthorization(error),
+                    reqwest::StatusCode::INTERNAL_SERVER_ERROR => Error::JunoInternalServerError(error),
+                    _ => Error::Response(error),
+                }
+            );
+        }
+
+        Ok(response.unwrap())
     }
 
     fn base_url(&self) -> &str {
@@ -98,7 +115,7 @@ impl JunoApi {
         format!("Basic {}", encoded)
     }
 
-    async fn get_bearer_authorization(&self) -> String {
+    async fn get_bearer_authorization(&self) -> Result<String, Error> {
         lazy_static! {
             static ref CACHE: Mutex<TtlCache<String, String>> = Mutex::new(TtlCache::new(2));
         }
@@ -108,7 +125,7 @@ impl JunoApi {
         let mut cache_guard = CACHE.lock().unwrap();
 
         let token = match cache_guard.get(&basic_authorization) {
-            Some(value) => value.clone(),
+            Some(value) => Ok(value.clone()),
             None => {
                 let mut headers = reqwest::header::HeaderMap::new();
 
@@ -123,21 +140,46 @@ impl JunoApi {
                     .headers(headers)
                     .form(&[("grant_type", "client_credentials")]);
 
-                let response = request.send().await.expect("Bearer token get error.");
+                let response = request.send().await;
 
-                let data: serde_json::Value = response.json().await.expect("Received body is not in json format.");
+                if response.is_err() {
+                    let error = response.err().unwrap();
+                    let status = error.status().unwrap();
 
-                data.validate_or_die(&["access_token", "expires_in"]);
+                    return Err(
+                        match status {
+                            reqwest::StatusCode::UNAUTHORIZED => Error::InvalidAuthorization(error),
+                            reqwest::StatusCode::INTERNAL_SERVER_ERROR => Error::JunoInternalServerError(error),
+                            _ => Error::Response(error),
+                        }
+                    );
+                }
+
+                let serialization = response.unwrap().json().await;
+
+                if serialization.is_err() {
+                    return Err(Error::JsonDeserialization);
+                }
+
+                let data: serde_json::Value = serialization.unwrap();
+
+                let fields = vec!["access_token", "expires_in"];
+
+                let missing_fields = data.validate(fields);
+
+                if missing_fields.len() != 0 {
+                    return Err(Error::MissingRequiredFields(missing_fields));
+                }
 
                 let access_token = data["access_token"].as_str().unwrap();
                 let expires_in = data["expires_in"].as_u64().unwrap();
 
                 cache_guard.insert(basic_authorization, access_token.to_string(), Duration::new(expires_in, 0));
 
-                access_token.to_string()
+                Ok(access_token.to_string())
             }
-        };
+        }?;
 
-        format!("Bearer {}", token)
+        Ok(format!("Bearer {}", token))
     }
 }
