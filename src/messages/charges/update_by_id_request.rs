@@ -1,6 +1,8 @@
+use crate::errors::Error;
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-use serde_json::*;
+use serde_json::Value;
+use serde_json::json;
 use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/updateById](https://dev.juno.com.br/api/v2#operation/updateById).
@@ -49,12 +51,18 @@ impl AbstractRequest for UpdateByIdRequest {
         format!("charges/{}/split", self.id)
     }
 
-    fn data(&self) -> Value {
-        let params = self.parameters.only_or_die(&[
+    fn data(&self) -> Result<Value, Error> {
+        let params = self.parameters.clone();
+
+        require!(params, vec![
             "split",
         ]);
 
-        params
+        let data = params.only(&[
+            "split",
+        ]);
+
+        Ok(data)
     }
 }
 

@@ -1,6 +1,8 @@
+use crate::errors::Error;
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-use serde_json::*;
+use serde_json::Value;
+use serde_json::json;
 use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/createPayment](https://dev.juno.com.br/api/v2#operation/createPayment).
@@ -56,34 +58,42 @@ impl AbstractRequest for CreatePaymentRequest {
         format!("payments")
     }
 
-    fn data(&self) -> Value {
-        let mut params = self.parameters.only_or_die(&[
+    fn data(&self) -> Result<Value, Error> {
+        let params = self.parameters.clone();
+
+        require!(params, vec![
             "chargeId",
             "billing",
             "creditCardDetails",
         ]);
 
-        params["billing"].validate_or_die(&[
+        let mut data = params.only(&[
+            "chargeId",
+            "billing",
+            "creditCardDetails",
+        ]);
+
+        require!(data["billing"], vec![
             "email",
             "address",
             "delayed",
         ]);
 
-        params["billing"]["address"].validate_or_die(&[
+        require!(data["billing"]["address"], vec![
             "street",
             "city",
             "state",
             "postCode",
         ]);
 
-        params["billing"]["address"]["number"] = params["billing"]["address"].get("number").unwrap_or(&json!("N/A")).clone();
+        data["billing"]["address"]["number"] = data["billing"]["address"].get("number").unwrap_or(&json!("N/A")).clone();
 
-        params["creditCardDetails"].validate_or_die(&[
+        require!(data["creditCardDetails"], vec![
             "creditCardId",
             "creditCardHash",
         ]);
 
-        params
+        Ok(data)
     }
 }
 

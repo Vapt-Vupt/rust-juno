@@ -1,7 +1,9 @@
+use crate::errors::Error;
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-// use serde_json::*;
-// use crate::utils::*;
+use serde_json::Value;
+use serde_json::json;
+use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/getCompanyTypes](https://dev.juno.com.br/api/v2#operation/getCompanyTypes).
 ///

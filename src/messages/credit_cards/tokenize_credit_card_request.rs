@@ -1,6 +1,8 @@
+use crate::errors::Error;
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-use serde_json::*;
+use serde_json::Value;
+use serde_json::json;
 use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/tokenizeCreditCard](https://dev.juno.com.br/api/v2#operation/tokenizeCreditCard).
@@ -39,12 +41,18 @@ impl AbstractRequest for TokenizeCreditCardRequest {
         format!("credit-cards/tokenization")
     }
 
-    fn data(&self) -> Value {
-        let params = self.parameters.only_or_die(&[
+    fn data(&self) -> Result<Value, Error> {
+        let params = self.parameters.clone();
+
+        require!(params, vec![
             "creditCardHash",
         ]);
 
-        params
+        let data = params.only(&[
+            "creditCardHash",
+        ]);
+
+        Ok(data)
     }
 }
 

@@ -47,3 +47,12 @@ impl ValueUtils for serde_json::Value {
         data
     }
 }
+
+macro_rules! require {
+    ($arg:expr, $fields:expr) => {
+        let _missign_fields = $arg.validate($fields);
+        if _missign_fields.len() != 0 {
+            return Err(Error::MissingRequiredFields(_missign_fields));
+        }
+    };
+}

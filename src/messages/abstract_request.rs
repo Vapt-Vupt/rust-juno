@@ -1,5 +1,6 @@
-use serde_json::*;
-use reqwest::*;
+use crate::errors::Error;
+use reqwest::{Method, header};
+use serde_json::{Value, json};
 
 /// Every Juno route needs to implement AbstractRequest.
 ///
@@ -28,8 +29,8 @@ pub trait AbstractRequest {
     /// Work with model data to send it with the request body.
     ///
     /// Implement it if route needs body parameters.
-    fn data(&self) -> Value {
-        json!({})
+    fn data(&self) -> Result<Value, Error> {
+        Ok(json!({}))
     }
 
     /// Prepare header to send it with the request.
