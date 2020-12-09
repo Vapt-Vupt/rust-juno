@@ -393,7 +393,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "juno_api"
+name = "juno-api"
 version = "0.1.0"
 dependencies = [
  "base64",
