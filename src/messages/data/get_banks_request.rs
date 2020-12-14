@@ -9,14 +9,8 @@ use crate::utils::*;
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::data::GetBanksRequest;
-/// let response = junoApi.request(req).await;
+/// let req = juno_api::messages::data::GetBanksRequest;
+/// let response = juno_api::request(req).await;
 /// ```
 pub struct GetBanksRequest;
 

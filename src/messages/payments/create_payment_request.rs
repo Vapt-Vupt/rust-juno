@@ -9,13 +9,7 @@ use crate::utils::*;
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::payments::CreatePaymentRequest {
+/// let req = juno_api::messages::payments::CreatePaymentRequest {
 ///     resource_token: "{resourceToken}",
 ///     parameters: serde_json::json!({
 ///       "chargeId": "string",
@@ -38,7 +32,7 @@ use crate::utils::*;
 ///       }
 ///     }),
 /// }
-/// let response = junoApi.request(req).await;
+/// let response = juno_api::request(req).await;
 /// ```
 pub struct CreatePaymentRequest {
     pub resource_token: String,

@@ -2,22 +2,15 @@
 #[cfg(test)]
 mod tests {
     use serde_json::json;
-    use crate::JunoApi;
-    use crate::messages;
+    use dotenv::dotenv;
+    use crate::{messages, request};
     #[tokio::test]
     async fn test_connection() {
-        
-        let juno = JunoApi::with(
-            serde_json::json!({
-                "clientId": "{clientId}",
-                "clientSecret": "{clientSecret}",
-            })
-        )
-        .test_mode(true);
+        dotenv().ok();
 
         let req = messages::data::GetCompanyTypesRequest;
 
-        let response: reqwest::Response = juno.request(req).await.unwrap();
+        let response: reqwest::Response = request(req).await.unwrap();
 
         if response.status() == 200 {
             let json: serde_json::Value = response.json().await.unwrap();
@@ -29,14 +22,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_tokenize_credit_card() {
-        
-        let juno = JunoApi::with(
-            serde_json::json!({
-                "clientId": "{}",
-                "clientSecret": "{}",
-            })
-        )
-        .test_mode(true);
+        dotenv().ok();
 
         let req = messages::credit_cards::TokenizeCreditCardRequest {
             resource_token: "{}".to_string(),
@@ -45,7 +31,7 @@ mod tests {
             }),
         };
 
-        let response: reqwest::Response = juno.request(req).await.unwrap();
+        let response: reqwest::Response = request(req).await.unwrap();
 
         if response.status() == 200 {
             let json: serde_json::Value = response.json().await.unwrap();

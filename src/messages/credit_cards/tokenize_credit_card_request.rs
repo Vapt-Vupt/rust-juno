@@ -9,19 +9,13 @@ use crate::utils::*;
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::credit_cards::TokenizeCreditCardRequest {
+/// let req = juno_api::messages::credit_cards::TokenizeCreditCardRequest {
 ///     resource_token: "{resourceToken}",
 ///     parameters: serde_json::json!({
 ///       "creditCardHash": "string"
 ///     }),
 /// };
-/// let response = junoApi.request(req).await;
+/// let response = juno_api::request(req).await;
 /// ```
 pub struct TokenizeCreditCardRequest {
     pub resource_token: String,

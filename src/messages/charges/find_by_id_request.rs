@@ -9,17 +9,11 @@ use crate::utils::*;
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::charges::FindByIdRequest {
+/// let req = juno_api::messages::charges::FindByIdRequest {
 ///     resource_token: "{resourceToken}",
 ///     id: "{id}",
 /// };
-/// let response = junoApi.request(req).await;
+/// let response = juno_api::request(req).await;
 /// ```
 pub struct FindByIdRequest {
     pub resource_token: String,

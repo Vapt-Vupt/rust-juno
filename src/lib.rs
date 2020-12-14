@@ -1,8 +1,8 @@
 #[macro_use]
-pub mod utils;
+mod utils;
 pub mod errors;
 pub mod messages;
-pub mod tests;
+mod tests;
 
 use base64::{encode as base64_encode};
 use std::{time::Duration};
@@ -20,14 +20,11 @@ use crate::errors::*;
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::data::GetBanksRequest;
-/// let response: reqwest::Response = juno.request(req).await.unwrap();
+/// let req = juno_api::messages::data::GetBanksRequest;
+///
+/// // The pub function request needs you to set env vars [JUNO_TEST_MODE, JUNO_CLIENT_ID, JUNO_CLIENT_SECRET].
+/// // [JUNO_TEST_CLIENT_ID, JUNO_TEST_CLIENT_SECRET] are for test mode.
+/// let response: reqwest::Response = juno_api::request(req).await.unwrap();
 /// 
 /// if response.status() == 200 {
 ///     let json: serde_json::Value = response.json().await.unwrap();
@@ -191,4 +188,33 @@ impl JunoApi {
 
         Ok(format!("Bearer {}", token))
     }
+}
+
+pub async fn request(
+    req: impl AbstractRequest,
+) -> Result<reqwest::Response, Error> {
+    use std::env::var;
+
+    let test_mode: bool = var("JUNO_TEST_MODE").unwrap_or("false".to_string()).parse().unwrap();
+    
+    let (client_id, client_secret) = 
+        if test_mode {
+            (
+                var("JUNO_TEST_CLIENT_ID").expect("Missing JUNO_TEST_CLIENT_ID from env"),
+                var("JUNO_TEST_CLIENT_SECRET").expect("Missing JUNO_TEST_CLIENT_SECRET from env"),
+            )
+        } else {
+            (
+                var("JUNO_CLIENT_ID").expect("Missing JUNO_CLIENT_ID from env"),
+                var("JUNO_CLIENT_SECRET").expect("Missing JUNO_CLIENT_SECRET from env"),
+            )
+        };
+
+    let juno = JunoApi {
+        test_mode,
+        client_id,
+        client_secret,
+    };
+
+    juno.request(req).await
 }
