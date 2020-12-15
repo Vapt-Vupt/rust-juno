@@ -8,7 +8,7 @@ use base64::{encode as base64_encode};
 use std::{time::Duration};
 use ttl_cache::TtlCache;
 use lazy_static::*;
-use std::sync::Mutex;
+use mut_static::MutStatic;
 use crate::messages::AbstractRequest;
 use crate::utils::*;
 use crate::errors::*;
@@ -123,14 +123,27 @@ impl JunoApi {
 
     async fn get_bearer_authorization(&self) -> Result<String, Error> {
         lazy_static! {
-            static ref CACHE: Mutex<TtlCache<String, String>> = Mutex::new(TtlCache::new(2));
+            static ref CACHE: MutStatic<TtlCache<String, String>> = {
+                let cache: MutStatic<TtlCache<String, String>> = MutStatic::new();
+                cache.set(TtlCache::new(2)).unwrap();
+                cache
+            };
         }
 
         let basic_authorization = self.get_basic_authorization();
 
-        let mut cache_guard = CACHE.lock().unwrap();
+        let maybe_token: Option<String>;
+        {
+            let cache_read = CACHE.read().unwrap();
+            let token = cache_read.get(&basic_authorization);
+            
+            maybe_token = match token {
+                Some(v) => Some(v.clone()),
+                None => None,
+            };
+        }
 
-        let token = match cache_guard.get(&basic_authorization) {
+        let token = match maybe_token {
             Some(value) => Ok(value.clone()),
             None => {
                 let mut headers = reqwest::header::HeaderMap::new();
@@ -171,16 +184,15 @@ impl JunoApi {
 
                 let fields = vec!["access_token", "expires_in"];
 
-                let missing_fields = data.validate(fields);
-
-                if missing_fields.len() != 0 {
-                    return Err(Error::MissingRequiredFields(missing_fields));
-                }
+                require!(data, fields);
 
                 let access_token = data["access_token"].as_str().unwrap();
                 let expires_in = data["expires_in"].as_u64().unwrap();
 
-                cache_guard.insert(basic_authorization, access_token.to_string(), Duration::new(expires_in, 0));
+                {
+                    let mut cache_write = CACHE.write().unwrap();
+                    cache_write.insert(basic_authorization, access_token.to_string(), Duration::new(expires_in, 0));
+                }
 
                 Ok(access_token.to_string())
             }
