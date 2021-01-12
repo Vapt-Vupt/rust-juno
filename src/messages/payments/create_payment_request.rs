@@ -84,7 +84,6 @@ impl AbstractRequest for CreatePaymentRequest {
 
         require!(data["creditCardDetails"], vec![
             "creditCardId",
-            "creditCardHash",
         ]);
 
         Ok(data)
