@@ -4,7 +4,7 @@
 
 pub trait ValueUtils {
     fn has<T: serde_json::value::Index>(&self, key: T) -> bool;
-    fn validate<T: serde_json::value::Index>(&self, fields: &[T]) -> bool;
+    fn validate<T: serde_json::value::Index>(&self, fields: Vec<T>) -> Vec<T>;
     fn validate_or_die(&self, fields: &[&'static str]);
     fn only<T: serde_json::value::Index>(&self, fields: &[T]) -> serde_json::Value;
     fn only_or_die(&self, fields: &[&'static str]) -> serde_json::Value;
@@ -18,13 +18,8 @@ impl ValueUtils for serde_json::Value {
         }
     }
 
-    fn validate<T: serde_json::value::Index>(&self, fields: &[T]) -> bool {
-        for key in fields {
-            if !self.has(key) {
-                return false;
-            }
-        }
-        true
+    fn validate<T: serde_json::value::Index>(&self, fields: Vec<T>) -> Vec<T> {
+        return fields.into_iter().filter(|key| !self.has(key)).collect();
     }
 
     fn validate_or_die(&self, fields: &[&'static str]) {
@@ -51,4 +46,13 @@ impl ValueUtils for serde_json::Value {
         }
         data
     }
+}
+
+macro_rules! require {
+    ($arg:expr, $fields:expr) => {
+        let _missign_fields = $arg.validate($fields);
+        if _missign_fields.len() != 0 {
+            return Err(Error::MissingRequiredFields(_missign_fields));
+        }
+    };
 }

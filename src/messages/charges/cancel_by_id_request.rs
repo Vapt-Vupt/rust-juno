@@ -1,23 +1,19 @@
+use crate::errors::Error;
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-// use serde_json::*;
-// use crate::utils::*;
+use serde_json::Value;
+use serde_json::json;
+use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/cancelById](https://dev.juno.com.br/api/v2#operation/cancelById).
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::charges::CancelByIdRequest {
+/// let req = juno_api::messages::charges::CancelByIdRequest {
 ///     resource_token: "{resourceToken}",
 ///     id: "{id}",
 /// };
-/// let response = junoApi.request(req).await;
+/// let response = juno_api::request(req).await;
 /// ```
 pub struct CancelByIdRequest {
     pub resource_token: String,

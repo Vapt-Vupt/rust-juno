@@ -1,22 +1,18 @@
+use crate::errors::Error;
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-// use serde_json::*;
-// use crate::utils::*;
+use serde_json::Value;
+use serde_json::json;
+use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/findDigitalAccount](https://dev.juno.com.br/api/v2#operation/findDigitalAccount).
 ///
 /// # Usage example
 /// ```
-/// let junoApi = JunoApi::with(
-///     serde_json::json!({
-///         "clientId": "{clientId}",
-///         "clientSecret": "{clientSecret}",
-///     })
-/// );
-/// let req = messages::digital_accounts::FindDigitalAccountRequest {
+/// let req = juno_api::messages::digital_accounts::FindDigitalAccountRequest {
 ///     resource_token: "{resourceToken}",
 /// };
-/// let response = junoApi.request(req).await;
+/// let response = juno_api::request(req).await;
 /// ```
 pub struct FindDigitalAccountRequest {
     pub resource_token: String,
