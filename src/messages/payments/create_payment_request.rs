@@ -54,7 +54,8 @@ impl AbstractRequest for CreatePaymentRequest {
 
     fn data(&self) -> Result<Value, Error> {
         let params = self.parameters.clone();
-
+        use std::env::var;
+        let test_mode: bool = var("JUNO_TEST_MODE").unwrap_or("false".to_string()).parse().unwrap();
         require!(params, vec![
             "chargeId",
             "billing",
@@ -82,9 +83,17 @@ impl AbstractRequest for CreatePaymentRequest {
 
         data["billing"]["address"]["number"] = data["billing"]["address"].get("number").unwrap_or(&json!("N/A")).clone();
 
-        require!(data["creditCardDetails"], vec![
-            "creditCardId",
-        ]);
+        if test_mode {
+            require!(data["creditCardDetails"], vec![
+                "creditCardHash",
+            ]);
+        } else {
+            require!(data["creditCardDetails"], vec![
+                "creditCardId",
+            ]);
+        }
+        
+       
 
         Ok(data)
     }
