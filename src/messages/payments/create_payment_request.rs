@@ -83,11 +83,7 @@ impl AbstractRequest for CreatePaymentRequest {
 
         data["billing"]["address"]["number"] = data["billing"]["address"].get("number").unwrap_or(&json!("N/A")).clone();
 
-        if test_mode {
-            require!(data["creditCardDetails"], vec![
-                "creditCardHash",
-            ]);
-        } else {
+        if !test_mode {
             require!(data["creditCardDetails"], vec![
                 "creditCardId",
             ]);
