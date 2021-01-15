@@ -57,15 +57,6 @@ impl AbstractRequest for RefundPaymentRequest {
             "split",
         ]);
 
-        require!(data["split"], vec![
-            "recipientToken",
-            "amount",
-            "percentage",
-            "amountRemainder",
-            "chargeFee"
-        ]);
-
-
         Ok(data)
     }
 }
