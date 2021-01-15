@@ -49,15 +49,15 @@ impl AbstractRequest for RefundPaymentRequest {
         let params = self.parameters.clone();
         require!(params, vec![
             "amount",
-            "splits",
+            "split",
         ]);
 
         let  data = params.only(&[
             "amount",
-            "splits",
+            "split",
         ]);
 
-        require!(data["splits"], vec![
+        require!(data["split"], vec![
             "recipientToken",
             "amount",
             "percentage",
