@@ -2,7 +2,7 @@
 authors = ["matheussecundo <matheus.gois@dcomp.ufs.br>"]
 edition = "2018"
 name = "juno-api"
-version = "0.2.1"
+version = "0.3.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
