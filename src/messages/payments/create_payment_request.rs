@@ -1,9 +1,9 @@
 use crate::errors::Error;
 use crate::messages::AbstractRequest;
-use reqwest::Method;
-use serde_json::Value;
-use serde_json::json;
 use crate::utils::*;
+use reqwest::Method;
+use serde_json::json;
+use serde_json::Value;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/createPayment](https://dev.juno.com.br/api/v2#operation/createPayment).
 ///
@@ -43,7 +43,7 @@ impl AbstractRequest for CreatePaymentRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::POST
     }
@@ -55,43 +55,30 @@ impl AbstractRequest for CreatePaymentRequest {
     fn data(&self) -> Result<Value, Error> {
         let params = self.parameters.clone();
         use std::env::var;
-        let test_mode: bool = var("JUNO_TEST_MODE").unwrap_or("false".to_string()).parse().unwrap();
-        require!(params, vec![
-            "chargeId",
-            "billing",
-            "creditCardDetails",
-        ]);
+        let test_mode: bool = var("JUNO_TEST_MODE")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap();
+        require!(params, vec!["chargeId", "billing", "creditCardDetails",]);
 
-        let mut data = params.only(&[
-            "chargeId",
-            "billing",
-            "creditCardDetails",
-        ]);
+        let mut data = params.only(&["chargeId", "billing", "creditCardDetails"]);
 
-        require!(data["billing"], vec![
-            "email",
-            "address",
-            "delayed",
-        ]);
+        require!(data["billing"], vec!["email", "address", "delayed",]);
 
-        require!(data["billing"]["address"], vec![
-            "street",
-            "city",
-            "state",
-            "postCode",
-        ]);
+        require!(
+            data["billing"]["address"],
+            vec!["street", "city", "state", "postCode",]
+        );
 
-        data["billing"]["address"]["number"] = data["billing"]["address"].get("number").unwrap_or(&json!("N/A")).clone();
+        data["billing"]["address"]["number"] = data["billing"]["address"]
+            .get("number")
+            .unwrap_or(&json!("N/A"))
+            .clone();
 
         if !test_mode {
-            require!(data["creditCardDetails"], vec![
-                "creditCardId",
-            ]);
+            require!(data["creditCardDetails"], vec!["creditCardId",]);
         }
-        
-       
 
         Ok(data)
     }
 }
-

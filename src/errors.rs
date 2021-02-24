@@ -1,4 +1,4 @@
-use reqwest::{Error as ReqwestError};
+use reqwest::Error as ReqwestError;
 
 #[derive(Debug)]
 pub enum Error {

@@ -1,9 +1,8 @@
-
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
-    use dotenv::dotenv;
     use crate::{messages, request};
+    use dotenv::dotenv;
+    use serde_json::json;
     #[tokio::test]
     async fn test_connection() {
         dotenv().ok();

@@ -1,4 +1,3 @@
-
 use crate::messages::AbstractRequest;
 use reqwest::Method;
 
@@ -19,7 +18,7 @@ impl AbstractRequest for GetBalanceRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::GET
     }
@@ -28,4 +27,3 @@ impl AbstractRequest for GetBalanceRequest {
         format!("balance")
     }
 }
-

@@ -1,4 +1,3 @@
-
 use crate::messages::AbstractRequest;
 use reqwest::Method;
 
@@ -21,7 +20,7 @@ impl AbstractRequest for CancelByIdRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::PUT
     }
@@ -30,4 +29,3 @@ impl AbstractRequest for CancelByIdRequest {
         format!("charges/{}/cancelation", self.id)
     }
 }
-

@@ -4,14 +4,14 @@ pub mod errors;
 pub mod messages;
 mod tests;
 
-use base64::{encode as base64_encode};
-use std::{time::Duration};
-use ttl_cache::TtlCache;
-use lazy_static::*;
-use mut_static::MutStatic;
+use crate::errors::*;
 use crate::messages::AbstractRequest;
 use crate::utils::*;
-use crate::errors::*;
+use base64::encode as base64_encode;
+use lazy_static::*;
+use mut_static::MutStatic;
+use std::time::Duration;
+use ttl_cache::TtlCache;
 
 /// Juno api requires 2 fields: clientId and clientSecret to operate.
 ///
@@ -25,7 +25,7 @@ use crate::errors::*;
 /// // The pub function request needs you to set env vars [JUNO_TEST_MODE, JUNO_CLIENT_ID, JUNO_CLIENT_SECRET].
 /// // [JUNO_TEST_CLIENT_ID, JUNO_TEST_CLIENT_SECRET] are for test mode.
 /// let response: reqwest::Response = juno_api::request(req).await.unwrap();
-/// 
+///
 /// if response.status() == 200 {
 ///     let json: serde_json::Value = response.json().await.unwrap();
 ///     println!("{:?}", json);
@@ -40,10 +40,12 @@ pub struct JunoApi {
 }
 
 impl JunoApi {
-    const LIVE_BASE_URL: &'static str       = "https://api.juno.com.br";
-    const TEST_BASE_URL: &'static str       = "https://sandbox.boletobancario.com/api-integration";
-    const AUTH_LIVE_ENDPOINT: &'static str  = "https://api.juno.com.br/authorization-server/oauth/token";
-    const AUTH_TEST_ENDPOINT: &'static str  = "https://sandbox.boletobancario.com/authorization-server/oauth/token";
+    const LIVE_BASE_URL: &'static str = "https://api.juno.com.br";
+    const TEST_BASE_URL: &'static str = "https://sandbox.boletobancario.com/api-integration";
+    const AUTH_LIVE_ENDPOINT: &'static str =
+        "https://api.juno.com.br/authorization-server/oauth/token";
+    const AUTH_TEST_ENDPOINT: &'static str =
+        "https://sandbox.boletobancario.com/authorization-server/oauth/token";
 
     /// Insert json args: {clientId, clientSecret, testMode}.
     pub fn with(config: serde_json::Value) -> Self {
@@ -66,10 +68,7 @@ impl JunoApi {
     /// # Arguments
     ///
     /// * `req` - A request instance that implements AbstractRequest trait.
-    pub async fn request(
-        &self,
-        req: impl AbstractRequest,
-    ) -> Result<reqwest::Response, Error>  {
+    pub async fn request(&self, req: impl AbstractRequest) -> Result<reqwest::Response, Error> {
         let mut headers = reqwest::header::HeaderMap::new();
 
         let bearer_token = self.get_bearer_authorization().await?;
@@ -96,24 +95,30 @@ impl JunoApi {
             let error = response.err().unwrap();
             let status = error.status().unwrap();
 
-            return Err(
-                match status {
-                    reqwest::StatusCode::UNAUTHORIZED => Error::InvalidAuthorization(error),
-                    reqwest::StatusCode::INTERNAL_SERVER_ERROR => Error::JunoInternalServerError(error),
-                    _ => Error::Response(error),
-                }
-            );
+            return Err(match status {
+                reqwest::StatusCode::UNAUTHORIZED => Error::InvalidAuthorization(error),
+                reqwest::StatusCode::INTERNAL_SERVER_ERROR => Error::JunoInternalServerError(error),
+                _ => Error::Response(error),
+            });
         }
 
         Ok(response.unwrap())
     }
 
     fn base_url(&self) -> &str {
-        if self.test_mode {Self::TEST_BASE_URL} else {Self::LIVE_BASE_URL}
+        if self.test_mode {
+            Self::TEST_BASE_URL
+        } else {
+            Self::LIVE_BASE_URL
+        }
     }
 
     fn auth_url(&self) -> &str {
-        if self.test_mode {Self::AUTH_TEST_ENDPOINT} else {Self::AUTH_LIVE_ENDPOINT}
+        if self.test_mode {
+            Self::AUTH_TEST_ENDPOINT
+        } else {
+            Self::AUTH_LIVE_ENDPOINT
+        }
     }
 
     fn get_basic_authorization(&self) -> String {
@@ -136,7 +141,7 @@ impl JunoApi {
         {
             let cache_read = CACHE.read().unwrap();
             let token = cache_read.get(&basic_authorization);
-            
+
             maybe_token = match token {
                 Some(v) => Some(v.clone()),
                 None => None,
@@ -149,13 +154,13 @@ impl JunoApi {
                 let mut headers = reqwest::header::HeaderMap::new();
 
                 headers.append("Authorization", basic_authorization.parse().unwrap());
-                headers.append("Content-Type", "application/x-www-form-urlencoded".parse().unwrap());
+                headers.append(
+                    "Content-Type",
+                    "application/x-www-form-urlencoded".parse().unwrap(),
+                );
 
                 let request = reqwest::Client::new()
-                    .request(
-                        reqwest::Method::POST,
-                        self.auth_url(),
-                    )
+                    .request(reqwest::Method::POST, self.auth_url())
                     .headers(headers)
                     .form(&[("grant_type", "client_credentials")]);
 
@@ -165,13 +170,13 @@ impl JunoApi {
                     let error = response.err().unwrap();
                     let status = error.status().unwrap();
 
-                    return Err(
-                        match status {
-                            reqwest::StatusCode::UNAUTHORIZED => Error::InvalidAuthorization(error),
-                            reqwest::StatusCode::INTERNAL_SERVER_ERROR => Error::JunoInternalServerError(error),
-                            _ => Error::Response(error),
+                    return Err(match status {
+                        reqwest::StatusCode::UNAUTHORIZED => Error::InvalidAuthorization(error),
+                        reqwest::StatusCode::INTERNAL_SERVER_ERROR => {
+                            Error::JunoInternalServerError(error)
                         }
-                    );
+                        _ => Error::Response(error),
+                    });
                 }
 
                 let serialization = response.unwrap().json().await;
@@ -191,7 +196,11 @@ impl JunoApi {
 
                 {
                     let mut cache_write = CACHE.write().unwrap();
-                    cache_write.insert(basic_authorization, access_token.to_string(), Duration::new(expires_in, 0));
+                    cache_write.insert(
+                        basic_authorization,
+                        access_token.to_string(),
+                        Duration::new(expires_in, 0),
+                    );
                 }
 
                 Ok(access_token.to_string())
@@ -202,25 +211,25 @@ impl JunoApi {
     }
 }
 
-pub async fn request(
-    req: impl AbstractRequest,
-) -> Result<reqwest::Response, Error> {
+pub async fn request(req: impl AbstractRequest) -> Result<reqwest::Response, Error> {
     use std::env::var;
 
-    let test_mode: bool = var("JUNO_TEST_MODE").unwrap_or("false".to_string()).parse().unwrap();
-    
-    let (client_id, client_secret) = 
-        if test_mode {
-            (
-                var("JUNO_TEST_CLIENT_ID").expect("Missing JUNO_TEST_CLIENT_ID from env"),
-                var("JUNO_TEST_CLIENT_SECRET").expect("Missing JUNO_TEST_CLIENT_SECRET from env"),
-            )
-        } else {
-            (
-                var("JUNO_CLIENT_ID").expect("Missing JUNO_CLIENT_ID from env"),
-                var("JUNO_CLIENT_SECRET").expect("Missing JUNO_CLIENT_SECRET from env"),
-            )
-        };
+    let test_mode: bool = var("JUNO_TEST_MODE")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap();
+
+    let (client_id, client_secret) = if test_mode {
+        (
+            var("JUNO_TEST_CLIENT_ID").expect("Missing JUNO_TEST_CLIENT_ID from env"),
+            var("JUNO_TEST_CLIENT_SECRET").expect("Missing JUNO_TEST_CLIENT_SECRET from env"),
+        )
+    } else {
+        (
+            var("JUNO_CLIENT_ID").expect("Missing JUNO_CLIENT_ID from env"),
+            var("JUNO_CLIENT_SECRET").expect("Missing JUNO_CLIENT_SECRET from env"),
+        )
+    };
 
     let juno = JunoApi {
         test_mode,

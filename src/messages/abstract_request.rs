@@ -1,12 +1,11 @@
 use crate::errors::Error;
-use reqwest::{Method, header};
-use serde_json::{Value, json};
+use reqwest::{header, Method};
+use serde_json::{json, Value};
 
 /// Every Juno route needs to implement AbstractRequest.
 ///
 /// Required implementations [http_method, endpoint].
 pub trait AbstractRequest {
-
     /// Almost every Juno route needs a privateKey that is the resourceToken.
     ///
     /// Default to ```None```.
@@ -38,7 +37,7 @@ pub trait AbstractRequest {
         let mut header = header::HeaderMap::new();
 
         header.append("X-Api-Version", "2".parse().unwrap());
-        
+
         match self.resource_token() {
             Some(value) => {
                 header.append("X-Resource-Token", value.parse().unwrap());

@@ -1,9 +1,9 @@
 use crate::errors::Error;
 use crate::messages::AbstractRequest;
-use reqwest::Method;
-use serde_json::Value;
-use serde_json::json;
 use crate::utils::*;
+use reqwest::Method;
+use serde_json::json;
+use serde_json::Value;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/getBusinessAreas](https://dev.juno.com.br/api/v2#operation/getBusinessAreas).
 ///
@@ -15,7 +15,6 @@ use crate::utils::*;
 pub struct GetBusinessAreasRequest;
 
 impl AbstractRequest for GetBusinessAreasRequest {
-    
     fn http_method(&self) -> Method {
         Method::GET
     }
@@ -24,4 +23,3 @@ impl AbstractRequest for GetBusinessAreasRequest {
         format!("data/business-areas")
     }
 }
-

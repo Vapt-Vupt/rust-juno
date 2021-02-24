@@ -1,7 +1,5 @@
-
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/findById](https://dev.juno.com.br/api/v2#operation/findById).
 ///
@@ -22,7 +20,7 @@ impl AbstractRequest for FindByIdRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::GET
     }
@@ -31,4 +29,3 @@ impl AbstractRequest for FindByIdRequest {
         format!("charges/{}", self.id)
     }
 }
-
