@@ -10,7 +10,45 @@ use serde_json::{json, Value};
 /// let req = juno_api::messages::digital_accounts::RequestTransferRequest {
 ///     resource_token: "{resourceToken}",
 /// };
-/// let response = juno_api::request(req).await;
+///
+/// // For P2P 
+/// let req = juno_api::messages::payments::RequestTransferRequest {
+///     resource_token: "{resourceToken}",
+///     parameters: serde_json::json!({
+///       "type": "P2P",
+///       "name": "<receiver name>",
+///       "document": "<receiver digital account CPF(len=11) | CNPJ(len=14)>",
+///       "amount": "<amount>",
+///       "bankAccount": {
+///         "accountNumber": "<dac_id>",
+///       }
+///     }),
+/// }
+/// //For DEFAULT_BANK_ACCOUNT 
+/// let req = juno_api::messages::payments::RequestTransferRequest {
+///     resource_token: "{resourceToken}",
+///     parameters: serde_json::json!({
+///       "type": "DEFAULT_BANK_ACCOUNT",
+///       "amount": "<amount>",
+///     }),
+/// }
+/// //For BANK_ACCOUNT 
+/// let req = juno_api::messages::payments::RequestTransferRequest {
+///     resource_token: "{resourceToken}",
+///     parameters: serde_json::json!({
+///       "BANK_ACCOUNT": "P2P",
+///       "name": "<receiver name>",
+///       "document": "<receiver digital account CPF(len=11) | CNPJ(len=14)>",
+///       "amount": "<amount>",
+///       "bankAccount": {
+///         "bankNumber": "<bankNumber>",
+///         "agencyNumber": "<agencyNumber>",
+///         "accountNumber": "<accountNumber>",
+///         "accountComplementNumber": "<accountComplementNumber/CEF>",
+///         "accountType": "CHECKING | SAVINGS"
+///       }
+///     }),
+/// }
 /// ```
 pub struct RequestTransferRequest {
     pub resource_token: String,
