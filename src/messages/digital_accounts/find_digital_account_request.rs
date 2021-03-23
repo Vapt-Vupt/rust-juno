@@ -1,7 +1,5 @@
-
 use crate::messages::AbstractRequest;
 use reqwest::Method;
-
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/findDigitalAccount](https://dev.juno.com.br/api/v2#operation/findDigitalAccount).
 ///
@@ -20,7 +18,7 @@ impl AbstractRequest for FindDigitalAccountRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::GET
     }
@@ -29,4 +27,3 @@ impl AbstractRequest for FindDigitalAccountRequest {
         format!("digital-accounts")
     }
 }
-

@@ -1,9 +1,9 @@
 use crate::errors::Error;
 use crate::messages::AbstractRequest;
-use reqwest::Method;
-use serde_json::Value;
-use serde_json::json;
 use crate::utils::*;
+use reqwest::Method;
+use serde_json::json;
+use serde_json::Value;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/createCharge](https://dev.juno.com.br/api/v2#operation/createCharge).
 ///
@@ -64,7 +64,7 @@ impl AbstractRequest for CreateChargeRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::POST
     }
@@ -76,10 +76,7 @@ impl AbstractRequest for CreateChargeRequest {
     fn data(&self) -> Result<Value, Error> {
         let params = self.parameters.clone();
 
-        require!(params, vec![
-            "charge",
-            "billing",
-        ]);
+        require!(params, vec!["charge", "billing",]);
 
         let charge = params["charge"].only(&[
             "pixKey",
@@ -111,15 +108,9 @@ impl AbstractRequest for CreateChargeRequest {
             "notify",
         ]);
 
-        require!(charge, vec![
-            "description",
-            "amount",
-        ]);
-        
-        require!(billing, vec![
-            "name",
-            "document",
-        ]);
+        require!(charge, vec!["description", "amount",]);
+
+        require!(billing, vec!["name", "document",]);
 
         let data = json!({
             "charge": charge,
@@ -129,4 +120,3 @@ impl AbstractRequest for CreateChargeRequest {
         Ok(data)
     }
 }
-

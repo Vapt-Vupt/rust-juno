@@ -42,7 +42,10 @@ impl ValueUtils for serde_json::Value {
     fn only_or_die(&self, fields: &[&'static str]) -> serde_json::Value {
         let mut data = serde_json::json!({});
         for key in fields {
-            data[key] = self.get(key).expect(format!("Missing {}", key).as_str()).clone();
+            data[key] = self
+                .get(key)
+                .expect(format!("Missing {}", key).as_str())
+                .clone();
         }
         data
     }

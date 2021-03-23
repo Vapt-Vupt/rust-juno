@@ -1,9 +1,8 @@
 use crate::errors::Error;
 use crate::messages::AbstractRequest;
+use crate::utils::*;
 use reqwest::Method;
 use serde_json::Value;
-use serde_json::json;
-use crate::utils::*;
 
 /// Request model for route [https://dev.juno.com.br/api/v2#operation/capturePayment](https://dev.juno.com.br/api/v2#operation/capturePayment).
 ///
@@ -29,7 +28,7 @@ impl AbstractRequest for CapturePaymentRequest {
     fn resource_token(&self) -> Option<&String> {
         Some(&self.resource_token)
     }
-    
+
     fn http_method(&self) -> Method {
         Method::POST
     }
@@ -41,17 +40,10 @@ impl AbstractRequest for CapturePaymentRequest {
     fn data(&self) -> Result<Value, Error> {
         let params = self.parameters.clone();
 
-        require!(params, vec![
-            "chargeId",
-            "amount",
-        ]);
+        require!(params, vec!["chargeId", "amount",]);
 
-        let data = params.only(&[
-            "chargeId",
-            "amount",
-        ]);
+        let data = params.only(&["chargeId", "amount"]);
 
         Ok(data)
     }
 }
-
