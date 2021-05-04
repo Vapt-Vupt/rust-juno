@@ -49,6 +49,22 @@ use serde_json::{json, Value};
 ///       }
 ///     }),
 /// }
+ //For PIX 
+/// let req = juno_api::messages::payments::RequestTransferRequest {
+///     resource_token: "{resourceToken}",
+///     parameters: serde_json::json!({
+///       "BANK_ACCOUNT": "PIX",
+///       "name": "<receiver name>",
+///       "document": "<receiver digital account CPF(len=11) | CNPJ(len=14)>",
+///       "amount": "<amount>",
+///       "bankAccount": {
+///         "bankNumber": "<bankNumber>",
+///         "agencyNumber": "<agencyNumber>",
+///         "accountNumber": "<accountNumber>",
+///         "accountType": "CHECKING | SAVINGS"
+///       }
+///     }),
+/// }
 /// ```
 pub struct RequestTransferRequest {
     pub resource_token: String,
@@ -61,7 +77,7 @@ impl AbstractRequest for RequestTransferRequest {
     }
 
     fn http_method(&self) -> Method {
-        Method::GET
+        Method::POST
     }
 
     fn endpoint(&self) -> String {
@@ -95,12 +111,24 @@ impl AbstractRequest for RequestTransferRequest {
                         "agencyNumber",
                         "accountNumber",
                         "accountType",
-                        "accountHolder"
                     ]
                 );
                 require!(
                     data["bankAccount"]["accountHolder"],
                     vec!["name", "document"]
+                );
+            }
+            else if *type_ == json!("PIX") {
+                require!(params, vec!["name", "document", "amount", "bankAccount"]);
+                data = params.only(&["name", "document", "amount", "bankAccount"]);
+                require!(
+                    data["bankAccount"],
+                    vec![
+                        "bankNumber",
+                        "agencyNumber",
+                        "accountNumber",
+                        "accountType",
+                    ]
                 );
             }
         }
