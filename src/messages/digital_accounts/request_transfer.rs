@@ -61,7 +61,7 @@ impl AbstractRequest for RequestTransferRequest {
     }
 
     fn http_method(&self) -> Method {
-        Method::GET
+        Method::POST
     }
 
     fn endpoint(&self) -> String {
