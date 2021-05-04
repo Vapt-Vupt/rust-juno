@@ -124,7 +124,6 @@ impl AbstractRequest for RequestTransferRequest {
                 require!(
                     data["bankAccount"],
                     vec![
-                        "bankNumber",
                         "agencyNumber",
                         "accountNumber",
                         "accountType",
