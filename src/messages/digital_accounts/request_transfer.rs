@@ -75,7 +75,7 @@ impl AbstractRequest for RequestTransferRequest {
         let mut data = params.only(&["type"]);
 
         if let Some(type_) = params.get("type") {
-            if *type_ == json!("P2P") {
+            if *type_ == json!("P2P") || *type_ == json!("PIX") {
                 require!(
                     params,
                     vec!["type", "name", "document", "amount", "bankAccount"]
