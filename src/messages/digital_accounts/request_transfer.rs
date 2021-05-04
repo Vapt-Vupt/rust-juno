@@ -49,6 +49,22 @@ use serde_json::{json, Value};
 ///       }
 ///     }),
 /// }
+ //For PIX 
+/// let req = juno_api::messages::payments::RequestTransferRequest {
+///     resource_token: "{resourceToken}",
+///     parameters: serde_json::json!({
+///       "BANK_ACCOUNT": "PIX",
+///       "name": "<receiver name>",
+///       "document": "<receiver digital account CPF(len=11) | CNPJ(len=14)>",
+///       "amount": "<amount>",
+///       "bankAccount": {
+///         "bankNumber": "<bankNumber>",
+///         "agencyNumber": "<agencyNumber>",
+///         "accountNumber": "<accountNumber>",
+///         "accountType": "CHECKING | SAVINGS"
+///       }
+///     }),
+/// }
 /// ```
 pub struct RequestTransferRequest {
     pub resource_token: String,
@@ -75,7 +91,7 @@ impl AbstractRequest for RequestTransferRequest {
         let mut data = params.only(&["type"]);
 
         if let Some(type_) = params.get("type") {
-            if *type_ == json!("P2P") || *type_ == json!("PIX") {
+            if *type_ == json!("P2P") {
                 require!(
                     params,
                     vec!["type", "name", "document", "amount", "bankAccount"]
@@ -95,12 +111,24 @@ impl AbstractRequest for RequestTransferRequest {
                         "agencyNumber",
                         "accountNumber",
                         "accountType",
-                        "accountHolder"
                     ]
                 );
                 require!(
                     data["bankAccount"]["accountHolder"],
                     vec!["name", "document"]
+                );
+            }
+            else if *type_ == json!("PIX") {
+                require!(params, vec!["name", "document", "amount", "bankAccount"]);
+                data = params.only(&["name", "document", "amount", "bankAccount"]);
+                require!(
+                    data["bankAccount"],
+                    vec![
+                        "bankNumber",
+                        "agencyNumber",
+                        "accountNumber",
+                        "accountType",
+                    ]
                 );
             }
         }
